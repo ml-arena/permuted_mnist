@@ -2,16 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name="metamnist",
-    version="0.1.0",
+    version="0.1",
     packages=find_packages(),
+    include_package_data=True,  # Important for including data files
+    package_data={
+        'metamnist': ['data/*.npy'],  # Include MNIST data files
+    },
     install_requires=[
-        "gymnasium>=0.29.1",
-        "numpy>=1.24.0",
-        "mnist>=0.2.2",  # Lightweight MNIST data loader
-        "scipy>=1.10.0",  # For image transformations
+        "scipy>=1.10.0",
     ],
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="A meta-learning environment for MNIST using Gymnasium",
-    python_requires=">=3.8",
 )

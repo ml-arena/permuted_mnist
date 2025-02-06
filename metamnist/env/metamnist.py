@@ -24,8 +24,8 @@ class MetaMNISTEnv(gym.Env):
         self.current_train_predictions = None
         self.number_steps = number_steps
         self.current_step = 0
-        self.current_label_permutation = None
-        self.current_pixel_permutation = None
+        self.label_permutation = None
+        self.pixel_permutation = None
         # Load pre-split MNIST dataset from package data
         data_path = os.path.join(PKG_DIR, 'data')
         try:
@@ -56,8 +56,8 @@ class MetaMNISTEnv(gym.Env):
             low=0, high=9, shape=(self.test_size,), dtype=np.uint8
         )
     def _create_permutations(self):
-        self.current_label_permutation = self.np_random.permutation(10)
-        self.current_pixel_permutation = self.np_random.permutation(28 * 28)
+        self.label_permutation = self.np_random.permutation(10)
+        self.pixel_permutation = self.np_random.permutation(28 * 28)
     def _permute_labels(self) -> Tuple[np.ndarray, np.ndarray]:
         """Create a random permutation of labels."""
         
@@ -90,17 +90,17 @@ class MetaMNISTEnv(gym.Env):
         return (shuffled_train_images, shuffled_train_labels, 
                 shuffled_test_images, shuffled_test_labels)
 
-    def _get_observation_array(self) -> np.ndarray:
-        """Convert current state to flattened observation array."""
-        train_images_flat = self.current_train_images.ravel()
-        train_labels_norm = self.current_train_labels
-        test_images_flat = self.current_test_images.ravel()
+    # def _get_observation_array(self) -> np.ndarray:
+    #     """Convert current state to flattened observation array."""
+    #     train_images_flat = self.current_train_images.ravel()
+    #     train_labels_norm = self.current_train_labels
+    #     test_images_flat = self.current_test_images.ravel()
         
-        return np.concatenate([
-            train_images_flat,
-            train_labels_norm,
-            test_images_flat
-        ])
+    #     return np.concatenate([
+    #         train_images_flat,
+    #         train_labels_norm,
+    #         test_images_flat
+    #     ])
 
     def reset(
         self, 
@@ -128,7 +128,8 @@ class MetaMNISTEnv(gym.Env):
 
     def _get_obs(self) -> np.ndarray:
         """Get the current observation."""
-        return self._get_observation_array()
+        return self.current_train_images, self.current_train_labels, self.current_test_images
+        # return self._get_observation_array()
 
     def _get_info(self) -> Dict[str, Any]:
         """Get additional information about the current state."""

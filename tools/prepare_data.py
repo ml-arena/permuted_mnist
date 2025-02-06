@@ -5,14 +5,14 @@ import os
 
 def download_and_process_mnist():
     """
-    Download MNIST dataset using PyTorch and save as 8-bit numpy arrays.
+    Download MNIST dataset using PyTorch and save train/test sets as 8-bit numpy arrays.
     """
     print("Downloading and processing MNIST dataset...")
     
     # Create data directory if it doesn't exist
     os.makedirs("metamnist/data", exist_ok=True)
     
-    # Download and load MNIST
+    # Download and load MNIST train set
     train_dataset = torchvision.datasets.MNIST(
         root='./temp_data',
         train=True,
@@ -20,37 +20,58 @@ def download_and_process_mnist():
         transform=torchvision.transforms.ToTensor()
     )
     
-    # Process all images
-    all_images = []
-    all_labels = []
+    # Download and load MNIST test set
+    test_dataset = torchvision.datasets.MNIST(
+        root='./temp_data',
+        train=False,
+        download=True,
+        transform=torchvision.transforms.ToTensor()
+    )
     
-    for img, label in train_dataset:
-        # Convert from [0,1] float to [0,255] uint8 range
-        img_uint8 = (img.numpy().squeeze() * 255).astype(np.uint8)
-        all_images.append(img_uint8)
-        all_labels.append(label)
+    def process_dataset(dataset, prefix):
+        images = []
+        labels = []
+        
+        for img, label in dataset:
+            # Convert from [0,1] float to [0,255] uint8 range
+            img_uint8 = (img.numpy().squeeze() * 255).astype(np.uint8)
+            images.append(img_uint8)
+            labels.append(label)
+        
+        # Convert to numpy arrays
+        images = np.stack(images)
+        labels = np.array(labels, dtype=np.uint8)
+        
+        # Save arrays
+        np.save(f"metamnist/data/mnist_{prefix}_images.npy", images)
+        np.save(f"metamnist/data/mnist_{prefix}_labels.npy", labels)
+        
+        return images, labels
     
-    # Convert to numpy arrays
-    images = np.stack(all_images)
-    labels = np.array(all_labels, dtype=np.uint8)
-    
-    # Save arrays
-    np.save("metamnist/data/mnist_images.npy", images)
-    np.save("metamnist/data/mnist_labels.npy", labels)
+    # Process train and test sets
+    train_images, train_labels = process_dataset(train_dataset, "train")
+    test_images, test_labels = process_dataset(test_dataset, "test")
     
     # Print information
-    print("\nDataset processed and saved:")
-    print(f"Images shape: {images.shape}")
-    print(f"Labels shape: {labels.shape}")
-    print(f"Images dtype: {images.dtype}")
-    print(f"Images value range: {images.min()} - {images.max()}")
-    print(f"Label distribution:")
-    unique, counts = np.unique(labels, return_counts=True)
-    for label, count in zip(unique, counts):
-        print(f"  Class {label}: {count} images")
+    def print_dataset_info(prefix, images, labels):
+        print(f"\n{prefix.capitalize()} dataset:")
+        print(f"Images shape: {images.shape}")
+        print(f"Labels shape: {labels.shape}")
+        print(f"Images dtype: {images.dtype}")
+        print(f"Images value range: {images.min()} - {images.max()}")
+        print(f"Label distribution:")
+        unique, counts = np.unique(labels, return_counts=True)
+        for label, count in zip(unique, counts):
+            print(f"  Class {label}: {count} images")
+    
+    print_dataset_info("train", train_images, train_labels)
+    print_dataset_info("test", test_images, test_labels)
+    
     print("\nFiles saved:")
-    print("- metamnist/data/mnist_images.npy")
-    print("- metamnist/data/mnist_labels.npy")
+    print("- metamnist/data/mnist_train_images.npy")
+    print("- metamnist/data/mnist_train_labels.npy")
+    print("- metamnist/data/mnist_test_images.npy")
+    print("- metamnist/data/mnist_test_labels.npy")
     
     # Clean up temporary files
     import shutil

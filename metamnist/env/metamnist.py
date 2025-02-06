@@ -24,7 +24,8 @@ class MetaMNISTEnv(gym.Env):
         self.current_train_predictions = None
         self.number_steps = number_steps
         self.current_step = 0
-        
+        self.current_label_permutation = None
+        self.current_pixel_permutation = None
         # Load pre-split MNIST dataset from package data
         data_path = os.path.join(PKG_DIR, 'data')
         try:
@@ -54,26 +55,24 @@ class MetaMNISTEnv(gym.Env):
         self.action_space = spaces.Box(
             low=0, high=9, shape=(self.test_size,), dtype=np.uint8
         )
-
+    def _create_permutations(self):
+        self.current_label_permutation = self.np_random.permutation(10)
+        self.current_pixel_permutation = self.np_random.permutation(28 * 28)
     def _permute_labels(self) -> Tuple[np.ndarray, np.ndarray]:
         """Create a random permutation of labels."""
-        # Create a permutation mapping for digits 0-9
-        label_permutation = self.np_random.permutation(10)
         
         # Apply permutation to both train and test labels
-        permuted_train_labels = label_permutation[self.current_train_labels]
-        permuted_test_labels = label_permutation[self.current_test_labels]
+        permuted_train_labels = self.label_permutation[self.current_train_labels]
+        permuted_test_labels = self.label_permutation[self.current_test_labels]
         
         return permuted_train_labels, permuted_test_labels
 
     def _permute_pixels(self, images: np.ndarray) -> np.ndarray:
         """Permute pixels consistently across all images."""
-        # Create a permutation for the 784 pixels
-        pixel_permutation = self.np_random.permutation(28 * 28)
         
         # Reshape images to (N, 784), permute, and reshape back
         flat_images = images.reshape(len(images), -1)
-        permuted_images = flat_images[:, pixel_permutation]
+        permuted_images = flat_images[:, self.pixel_permutation]
         return permuted_images.reshape(images.shape)
 
     def _shuffle_dataset(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -115,7 +114,7 @@ class MetaMNISTEnv(gym.Env):
         # Reset predictions
         self.current_test_predictions = None
         self.current_train_predictions = None
-        
+        self._create_permutations()
         # Start with shuffled datasets
         (self.current_train_images, self.current_train_labels,
          self.current_test_images, self.current_test_labels) = self._shuffle_dataset()
@@ -138,7 +137,7 @@ class MetaMNISTEnv(gym.Env):
     def step(self, action: np.ndarray) -> Tuple[Dict[str, np.ndarray], float, bool, bool, Dict[str, Any]]:
         """Execute one time step within the environment."""
         self.current_test_predictions = action
-
+        self._create_permutations()
         if not isinstance(action, np.ndarray) or action.shape != (self.test_size,):
             raise ValueError(f"Expected action shape ({self.test_size},), got {action.shape}")
             

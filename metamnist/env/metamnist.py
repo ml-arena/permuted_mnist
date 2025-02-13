@@ -16,10 +16,10 @@ class MetaMNISTEnv(gym.Env):
         render_mode: str = None,
         number_steps: int = 10,
     ):
+        print('init metamnist env')
         super().__init__()
-        
         self.render_mode = render_mode
-        self.renderer = MetaMNISTRenderer() if render_mode == "rgb_array" else None
+        self.renderer = None #MetaMNISTRenderer() if render_mode == "rgb_array" else None
         self.current_test_predictions = None
         self.current_train_predictions = None
         self.number_steps = number_steps
@@ -29,10 +29,14 @@ class MetaMNISTEnv(gym.Env):
         # Load pre-split MNIST dataset from package data
         data_path = os.path.join(PKG_DIR, 'data')
         try:
-            self.train_images = np.load(os.path.join(data_path, 'mnist_train_images.npy')).astype(np.int8)
-            self.train_labels = np.load(os.path.join(data_path, 'mnist_train_labels.npy')).astype(np.int8)
-            self.test_images = np.load(os.path.join(data_path, 'mnist_test_images.npy')).astype(np.int8)
-            self.test_labels = np.load(os.path.join(data_path, 'mnist_test_labels.npy')).astype(np.int8)
+            print('loading mnist data')
+            self.train_images = np.load(os.path.join(data_path, 'mnist_train_images.npy')).astype(np.uint8)
+            print('train_images loaded')
+            self.train_labels = np.load(os.path.join(data_path, 'mnist_train_labels.npy')).astype(np.uint8)
+            print('train_labels loaded')
+            self.test_images = np.load(os.path.join(data_path, 'mnist_test_images.npy')).astype(np.uint8)
+            print('test_images loaded')
+            self.test_labels = np.load(os.path.join(data_path, 'mnist_test_labels.npy')).astype(np.uint8)
         except (FileNotFoundError, OSError) as e:
             raise RuntimeError(
                 "MNIST data files not found. Please run the data preparation script first:\n"
@@ -43,33 +47,34 @@ class MetaMNISTEnv(gym.Env):
         self.train_size = len(self.train_images)
         self.test_size = len(self.test_images)
         # Single Box observation space
+        # Alternative version using float32 if you really need infinite bounds
+        print('creating observation space')
         self.observation_space = spaces.Dict({
             'X_train': spaces.Box(
-                low=-np.inf, 
-                high=np.inf, 
+                low=0,
+                high=255,
                 shape=(self.train_size, 28, 28),
                 dtype=np.uint8
             ),
             'y_train': spaces.Box(
-                low=-np.inf,
-                high=np.inf,
+                low=0,
+                high=9,
                 shape=(self.train_size, 1),
                 dtype=np.uint8
             ),
             'X_test': spaces.Box(
-                low=-np.inf,
-                high=np.inf,
+                low=0,
+                high=255,
                 shape=(self.test_size, 28, 28),
                 dtype=np.uint8
             )
         })
-        
-        # Action space for test set predictions
+        print('observation space created')
         self.action_space = spaces.Box(
-            low=-np.inf,
-            high=np.inf,
+            low=0,
+            high=9,
             shape=(self.test_size, 1),
-            dtype=np.float32
+            dtype=np.uint8
         )
     def _create_permutations(self):
         self.label_permutation = self.np_random.permutation(10)
@@ -124,6 +129,7 @@ class MetaMNISTEnv(gym.Env):
         options: Optional[dict] = None
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, Any]]:
         """Reset the environment to start a new episode."""
+        print('resetting env')
         super().reset(seed=seed)
         self.current_step = 0
         
@@ -131,19 +137,23 @@ class MetaMNISTEnv(gym.Env):
         self.current_test_predictions = None
         self.current_train_predictions = None
         self._create_permutations()
+        print('permutations created')
         # Start with shuffled datasets
         (self.current_train_images, self.current_train_labels,
          self.current_test_images, self.current_test_labels) = self._shuffle_dataset()
-        
+        print('datasets shuffled')
         self.current_train_labels, self.current_test_labels = self._permute_labels()
-            
+        print('labels permuted')
         self.current_train_images = self._permute_pixels(self.current_train_images)
+        print('pixels permuted')
         self.current_test_images = self._permute_pixels(self.current_test_images)
+        print('pixels permuted')
         
         return self._get_obs(), self._get_info()
 
     def _get_obs(self) -> np.ndarray:
         """Get the current observation."""
+        print('getting obs')
         observation = {
             'X_train': self.current_train_images,
             'y_train': self.current_train_labels,
@@ -158,6 +168,7 @@ class MetaMNISTEnv(gym.Env):
 
     def step(self, action: np.ndarray) -> Tuple[Dict[str, np.ndarray], float, bool, bool, Dict[str, Any]]:
         """Execute one time step within the environment."""
+        print('stepping env')  
         self.current_test_predictions = action
         self._create_permutations()
         if not isinstance(action, np.ndarray) or action.shape != (self.test_size,):

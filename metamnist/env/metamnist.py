@@ -19,7 +19,7 @@ class MetaMNISTEnv(gym.Env):
         print('init metamnist env')
         super().__init__()
         self.render_mode = render_mode
-        self.renderer = None #MetaMNISTRenderer() if render_mode == "rgb_array" else None
+        self.renderer = MetaMNISTRenderer() if render_mode == "rgb_array" else None
         self.current_test_predictions = None
         self.current_train_predictions = None
         self.number_steps = number_steps

@@ -42,18 +42,34 @@ class MetaMNISTEnv(gym.Env):
         # Store dataset sizes
         self.train_size = len(self.train_images)
         self.test_size = len(self.test_images)
-        
         # Single Box observation space
-        self.observation_space = spaces.Box(
-            low=0,
-            high=1,  # Both images and normalized labels will be in [0,1]
-            shape=(self.train_size * 28 * 28 + self.train_size + self.test_size * 28 * 28,),
-            dtype=np.uint8
-        )
+        self.observation_space = spaces.Dict({
+            'X_train': spaces.Box(
+                low=-np.inf, 
+                high=np.inf, 
+                shape=(self.train_size, 28, 28),
+                dtype=np.uint8
+            ),
+            'y_train': spaces.Box(
+                low=-np.inf,
+                high=np.inf,
+                shape=(self.train_size, 1),
+                dtype=np.uint8
+            ),
+            'X_test': spaces.Box(
+                low=-np.inf,
+                high=np.inf,
+                shape=(self.test_size, 28, 28),
+                dtype=np.uint8
+            )
+        })
         
         # Action space for test set predictions
         self.action_space = spaces.Box(
-            low=0, high=9, shape=(self.test_size,), dtype=np.uint8
+            low=-np.inf,
+            high=np.inf,
+            shape=(self.test_size, 1),
+            dtype=np.float32
         )
     def _create_permutations(self):
         self.label_permutation = self.np_random.permutation(10)
@@ -128,7 +144,12 @@ class MetaMNISTEnv(gym.Env):
 
     def _get_obs(self) -> np.ndarray:
         """Get the current observation."""
-        return self.current_train_images, self.current_train_labels, self.current_test_images
+        observation = {
+            'X_train': self.current_train_images,
+            'y_train': self.current_train_labels,
+            'X_test': self.current_test_images
+        }
+        return observation
         # return self._get_observation_array()
 
     def _get_info(self) -> Dict[str, Any]:

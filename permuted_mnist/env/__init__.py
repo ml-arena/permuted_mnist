@@ -1,6 +1,6 @@
 """
 PermutedMNIST environment module
 """
-from .PermutedMNIST import PermutedMNISTEnv
+from .permuted_mnist import PermutedMNISTEnv
 
 __all__ = ['PermutedMNISTEnv']

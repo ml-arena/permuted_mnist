@@ -10,7 +10,7 @@ def download_and_process_mnist():
     print("Downloading and processing MNIST dataset...")
     
     # Create data directory if it doesn't exist
-    os.makedirs("metamnist/data", exist_ok=True)
+    os.makedirs("permuted_mnist/data", exist_ok=True)
     
     # Download and load MNIST train set
     train_dataset = torchvision.datasets.MNIST(
@@ -43,8 +43,8 @@ def download_and_process_mnist():
         labels = np.array(labels, dtype=np.uint8)
         
         # Save arrays
-        np.save(f"metamnist/data/mnist_{prefix}_images.npy", images)
-        np.save(f"metamnist/data/mnist_{prefix}_labels.npy", labels)
+        np.save(f"permuted_mnist/data/mnist_{prefix}_images.npy", images)
+        np.save(f"permuted_mnist/data/mnist_{prefix}_labels.npy", labels)
         
         return images, labels
     
@@ -68,10 +68,10 @@ def download_and_process_mnist():
     print_dataset_info("test", test_images, test_labels)
     
     print("\nFiles saved:")
-    print("- metamnist/data/mnist_train_images.npy")
-    print("- metamnist/data/mnist_train_labels.npy")
-    print("- metamnist/data/mnist_test_images.npy")
-    print("- metamnist/data/mnist_test_labels.npy")
+    print("- permuted_mnist/data/mnist_train_images.npy")
+    print("- permuted_mnist/data/mnist_train_labels.npy")
+    print("- permuted_mnist/data/mnist_test_images.npy")
+    print("- permuted_mnist/data/mnist_test_labels.npy")
     
     # Clean up temporary files
     import shutil

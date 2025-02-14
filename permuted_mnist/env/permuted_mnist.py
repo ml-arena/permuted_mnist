@@ -3,10 +3,10 @@ import gymnasium as gym
 from gymnasium import spaces
 from typing import Optional, Tuple, Dict, Any
 import os
-from metamnist import PKG_DIR
-from .renderer import MetaMNISTRenderer
+from permuted_mnist import PKG_DIR
+from .renderer import PermutedMNISTRenderer
 
-class MetaMNISTEnv(gym.Env):
+class PermutedMNISTEnv(gym.Env):
     metadata = {
         "render_modes": ["rgb_array"],
         "render_fps": 30,
@@ -16,10 +16,10 @@ class MetaMNISTEnv(gym.Env):
         render_mode: str = None,
         number_steps: int = 10,
     ):
-        print('init metamnist env')
+        print('init permuted_mnist env')
         super().__init__()
         self.render_mode = render_mode
-        self.renderer = MetaMNISTRenderer() if render_mode == "rgb_array" else None
+        self.renderer = PermutedMNISTRenderer() if render_mode == "rgb_array" else None
         self.current_test_predictions = None
         self.current_train_predictions = None
         self.number_steps = number_steps

@@ -34,8 +34,8 @@ def compute_confusion_matrix(y_true: np.ndarray,
         
     return cm
 
-class MetaMNISTRenderer:
-    """Renderer for the MetaMNIST environment."""
+class PermutedMNISTRenderer:
+    """Renderer for the PermutedMNIST environment."""
     
     def __init__(self, figure_size: tuple = (8, 6)):
         """

@@ -1,4 +1,4 @@
-# MetaMNIST Environment
+# PermutedMNIST Environment
 
 A lightweight Gymnasium environment for meta-learning on MNIST dataset. This environment applies random transformations to MNIST images and challenges agents to adapt to these transformations.
 
@@ -57,7 +57,7 @@ import gymnasium as gym
 import numpy as np
 
 # Create environment
-env = gym.make('MetaMNIST-v0')
+env = gym.make('PermutedMNIST-v0')
 
 # Reset environment
 obs, info = env.reset()

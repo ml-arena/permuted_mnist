@@ -27,28 +27,9 @@ class Agent:
         self.test_size = env.test_images_shape[0]
 
     # timeout 10 min
-    def train_predict(X_train, Y_train, X_test):
+    def train_predict(self, X_train, Y_train, X_test):
 
     # timeout 30 sec
-    def predict(X_test):
+    def predict(self, X_test):
 
         return self.model.predict(X_test)
-
-
-
-env 
-
-
-create data 
-
-agent = Agent()
-
-thread (10 minute timeou)
-
-wait agent.train(data)
--> time, cpu, memory 
-
-thread (10 minute timeout)
-
-result = wait agent.predict(data)
--> compute accuracy

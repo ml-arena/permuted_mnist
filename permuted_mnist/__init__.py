@@ -10,6 +10,6 @@ PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 # Register the environment
 register(
     id='PermutedMNIST-v0',
-    entry_point='permuted_mnist.env.permuted_mnist:MetaMNISTEnv',
+    entry_point='permuted_mnist.env.permuted_mnist:PermutedMNISTEnv',
     max_episode_steps=100,
 )

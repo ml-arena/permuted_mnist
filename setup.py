@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="permuted_mnist",
-    version="0.13",
+    version="0.14",
     packages=find_packages(),
     include_package_data=True,  # Important for including data files
     package_data={

@@ -15,13 +15,6 @@ This is a fast adaptation challenge where agents must quickly learn to classify 
 pip install -e .
 ```
 
-## Dependencies
-
-- gymnasium
-- numpy
-- mnist (lightweight MNIST data loader)
-- scipy (for image transformations)
-
 ## Competition Rules & Constraints
 
 ### Resource Limits
@@ -74,15 +67,13 @@ To compete, you need to submit:
 
 1. **Agent Class File** (`agent.py`):
    - Must implement the standard Agent interface with `reset()`, `train()`, and `predict()` methods
-   - Should handle the resource constraints (1 minute, 4GB RAM, 2 CPUs)
 
-2. **Model Weights** (if applicable):
+2. **Util Files** (`.py`):
+   - the methods and function you need in your `agent.py`
+
+3. **Model Weights** (torch, jax or tensorflow if applicable):
    - Include any pre-trained weights or saved models your agent needs
-   - Keep file sizes reasonable to fit within memory constraints
 
-3. **Dependencies**:
-   - List any additional Python packages required
-   - Stick to standard ML libraries (numpy, scikit-learn, pytorch, tensorflow, etc.)
 
 ### Agent Interface
 

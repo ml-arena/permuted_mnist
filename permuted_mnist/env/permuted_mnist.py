@@ -67,9 +67,9 @@ class PermutedMNISTEnv:
         train_labels = self.label_permutation[train_labels]
         test_labels = self.label_permutation[test_labels]
 
-        # Apply pixel permutation
-        train_images = self._permute_pixels(train_images)
-        test_images = self._permute_pixels(test_images)
+        # Apply pixel permutation and task-specific noise
+        train_images = self._permute_pixels(train_images, self.current_episode)
+        test_images = self._permute_pixels(test_images, self.current_episode)
 
         self.current_episode += 1
 
@@ -80,11 +80,38 @@ class PermutedMNISTEnv:
             'y_test': test_labels  # Include true labels for evaluation
         }
 
-    def _permute_pixels(self, images: np.ndarray) -> np.ndarray:
-        """Permute pixels consistently across all images"""
+    def _permute_pixels(self, images: np.ndarray, task_id: int) -> np.ndarray:
+        """Permute pixels consistently across all images and add per-image random noise"""
         flat_images = images.reshape(len(images), -1)
         permuted_images = flat_images[:, self.pixel_permutation]
-        return permuted_images.reshape(images.shape)
+        permuted_images = permuted_images.reshape(images.shape)
+
+        # Add per-image noise + random brightness/contrast to prevent cheating
+        # Use task_id as base seed for reproducibility within the same task
+        task_rng = np.random.RandomState(task_id)
+
+        # Convert to float for processing
+        permuted_images = permuted_images.astype(np.float32) / 255.0
+
+        n_images = len(permuted_images)
+
+        # Generate per-image random parameters
+        scales = task_rng.uniform(0.96, 1.04, size=n_images)  # ±4% brightness
+        shifts = task_rng.uniform(-0.02, 0.02, size=n_images)  # ±2% offset
+
+        # Add per-pixel Gaussian noise (std=0.015)
+        noise = task_rng.normal(0, 0.015, permuted_images.shape)
+        permuted_images = permuted_images + noise
+
+        # Apply per-image random brightness/contrast
+        for i in range(n_images):
+            permuted_images[i] = permuted_images[i] * scales[i] + shifts[i]
+
+        # Clip to valid range and convert back to uint8
+        permuted_images = np.clip(permuted_images, 0, 1)
+        permuted_images = (permuted_images * 255).astype(np.uint8)
+
+        return permuted_images
 
     def evaluate(self, predictions: np.ndarray, true_labels: np.ndarray) -> float:
         """Calculate accuracy of predictions"""

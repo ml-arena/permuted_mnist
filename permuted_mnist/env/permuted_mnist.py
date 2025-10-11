@@ -1,6 +1,5 @@
 """
 Simplified Permuted MNIST Environment for Supervised Learning
-No gymnasium/RL dependencies - pure supervised learning workflow
 """
 import numpy as np
 import os
